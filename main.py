@@ -108,17 +108,41 @@ class overDueBalancePage(tk.Frame):
         table.insert("", "end", values=("John Smith", 25.00, "07584710472","johnSmith@yahoo.com"))
         table.insert("", "end", values=("Test 1", 25.60, "0988865239", "test1@mail.com"))
         table.insert("", "end", values=("Test 2", 400.00, "06876435670","test2@mail.com"))
+    
+def databaseTest(cur):
+    # this function loops a 100 times and adds some random test data to the database
+    import random
+    for i in range(100):
+        name = f"Test User {i}"
+        amountOwed = round(random.uniform(10.0, 500.0), 2)
+        phoneNumber = f"07{random.randint(10000000, 99999999)}"
+        email = f"test{i}@mail.com"
+
+        cur.execute("INSERT INTO users (name, amountOwed, phoneNumber, email) VALUES (?, ?, ?, ?)",
+                    (name, amountOwed, phoneNumber, email))
+def printDatabaseContents(cur):
+    cur.execute("SELECT * FROM users")
+    rows = cur.fetchall()
+    for row in rows:
+        print(row)
+
+
 
 if __name__ == "__main__":
     app = App()
     # Connect to a database (creates file if it doesn't exist)
-    conn = sqlite3.connect("payments.db")
-    
+    conn = sqlite3.connect("overdueBalances.db")
     # Create a cursor to run SQL commands
     cur = conn.cursor()
    #if the user does not owe anything, they will not be added to the database
-   # if the amountOwed is 0 they will be removed from the database
-    cur.execute(""" CREATE TABLE IF NOT EXISTS users ( id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, amountOwed REAL NOT NULL ) """)
-
+   #if the amountOwed is 0 they will be removed from the database
+    cur.execute(""" CREATE TABLE IF NOT EXISTS users ( 
+                id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                name TEXT NOT NULL, amountOwed REAL NOT NULL, 
+                phoneNumber TEXT NOT NULL, 
+                email TEXT NOT NULL ) """)
+    
+    databaseTest(cur)
+    printDatabaseContents(cur)
     app.mainloop()
     conn.close()
