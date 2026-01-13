@@ -3,7 +3,7 @@ from tkinter import ttk
 import sqlite3
 
 class App(tk.Tk):
-    def __init__(self):
+    def __init__(self, cur):
         super().__init__()
 
         self.title("LifeFitness App")
@@ -19,7 +19,7 @@ class App(tk.Tk):
         for Page in (LoginPage, HomePage,overDueBalancePage):
             # Page() creates a new instance of the current class we are iterating over
             # by passing in self we can access the methods of this class within every page class (showFrame())
-            frame = Page(self.container, self)
+            frame = Page(self.container, self,cur)
             #store the instance within the frames property
             self.frames[Page] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -51,7 +51,7 @@ class App(tk.Tk):
 
 
 class LoginPage(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, cur):
         super().__init__(parent)
         # instatiate the frame as you would instantiate a normal frame
         tk.Label(self, text="Login", font=("Arial", 18)).pack(pady=20)
@@ -86,18 +86,18 @@ class LoginPage(tk.Frame):
             self.message.config(text="Invalid credentials")
 
 class HomePage(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, cur):
         super().__init__(parent)
         #  instatiate the frame as you would instantiate a normal frame
         tk.Label(self, text="Welcome!", font=("Arial", 18)).pack(pady=20)
 
 
 class overDueBalancePage(tk.Frame):
-    def __init__(self,parent,controller):
+    def __init__(self,parent,controller,cur):
         super().__init__(parent)
         tk.Label(self, text="OverDue Balances", font=("Arial", 18)).pack(pady=20)
-
-        columns = ("Name", "Amount Unpaid", "Phone Number", "Email")
+        self.cur = cur
+        columns = ("Name", "Amount Due", "Phone Number", "Email")
 
         table = ttk.Treeview(self, columns=columns, show="headings")
         table.pack(fill="both", expand=True)
@@ -105,21 +105,23 @@ class overDueBalancePage(tk.Frame):
         for col in columns:
             table.heading(col, text=col)
 
-        table.insert("", "end", values=("John Smith", 25.00, "07584710472","johnSmith@yahoo.com"))
-        table.insert("", "end", values=("Test 1", 25.60, "0988865239", "test1@mail.com"))
-        table.insert("", "end", values=("Test 2", 400.00, "06876435670","test2@mail.com"))
-    
-def databaseTest(cur):
-    # this function loops a 100 times and adds some random test data to the database
-    import random
-    for i in range(100):
-        name = f"Test User {i}"
-        amountOwed = round(random.uniform(10.0, 500.0), 2)
-        phoneNumber = f"07{random.randint(10000000, 99999999)}"
-        email = f"test{i}@mail.com"
+        for row in self.fetch_overdue_data():
+            print("currentRow",row)
+            rowData = {
+                "Name": row["name"],
+                "Amount Due": row["amountOwed"],
+                "Phone Number": row["phoneNumber"],
+                "Email": row["email"]
+            }
+            table.insert("", "end", values=rowData)
 
-        cur.execute("INSERT INTO users (name, amountOwed, phoneNumber, email) VALUES (?, ?, ?, ?)",
-                    (name, amountOwed, phoneNumber, email))
+    def fetch_overdue_data(self):
+        rows = self.cur.execute("SELECT * FROM users")
+        rows = self.cur.fetchall()
+        for row in rows:
+            print(row)
+        return rows
+
 def printDatabaseContents(cur):
     cur.execute("SELECT * FROM users")
     rows = cur.fetchall()
@@ -127,22 +129,10 @@ def printDatabaseContents(cur):
         print(row)
 
 
-
 if __name__ == "__main__":
-    app = App()
-    # Connect to a database (creates file if it doesn't exist)
     conn = sqlite3.connect("overdueBalances.db")
-    # Create a cursor to run SQL commands
+    conn.row_factory = sqlite3.Row  # This makes rows behave like dictionaries
     cur = conn.cursor()
-   #if the user does not owe anything, they will not be added to the database
-   #if the amountOwed is 0 they will be removed from the database
-    cur.execute(""" CREATE TABLE IF NOT EXISTS users ( 
-                id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                name TEXT NOT NULL, amountOwed REAL NOT NULL, 
-                phoneNumber TEXT NOT NULL, 
-                email TEXT NOT NULL ) """)
-    
-    databaseTest(cur)
-    printDatabaseContents(cur)
+    app = App(cur)
     app.mainloop()
-    conn.close()
+    
