@@ -21,8 +21,8 @@
 
 ## Linux
 
-### Install Pip
-## Install pip virtual environment
+### Install Pip + venv
+
 ### Create cached .venv 
 `virtualenv name_of_project`
 ### Activate Virtual Environment
