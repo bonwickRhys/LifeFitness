@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+import sqlite3
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -104,10 +106,19 @@ class overDueBalancePage(tk.Frame):
             table.heading(col, text=col)
 
         table.insert("", "end", values=("John Smith", 25.00, "07584710472","johnSmith@yahoo.com"))
-        table.insert("", "end", values=("Test 1", 25.60, "0988865239", "test2@mail.com"))
+        table.insert("", "end", values=("Test 1", 25.60, "0988865239", "test1@mail.com"))
         table.insert("", "end", values=("Test 2", 400.00, "06876435670","test2@mail.com"))
-
 
 if __name__ == "__main__":
     app = App()
+    # Connect to a database (creates file if it doesn't exist)
+    conn = sqlite3.connect("payments.db")
+    
+    # Create a cursor to run SQL commands
+    cur = conn.cursor()
+   #if the user does not owe anything, they will not be added to the database
+   # if the amountOwed is 0 they will be removed from the database
+    cur.execute(""" CREATE TABLE IF NOT EXISTS users ( id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, amountOwed REAL NOT NULL ) """)
+
     app.mainloop()
+    conn.close()
