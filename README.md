@@ -18,3 +18,19 @@
 
 ### exit venv
 ` deactivate`
+
+## Linux
+
+### Install Pip
+## Install pip virtual environment
+### Create cached .venv 
+`virtualenv name_of_project`
+### Activate Virtual Environment
+` ./name_of_project/bin/activate`
+
+### Install Dependencies
+ `pip install -r ./requirements.txt`
+ 
+### exit venv
+` deactivate`
+
