@@ -31,10 +31,16 @@ class Database:
         if count > 0: return # already seeded 
 
         for i in range(1, recordNum+1): 
-            name = f"test{i}" 
-            amount = round(random.uniform(1, 1000), 2)
-            phone ="07" + "".join(random.choices(string.digits, k=9))
-            email = "rhysbonwick2006@gmail.com" 
+            if i == 1:
+                name = "Stevie Watts" 
+                amount = 250.75
+                phone = "07123456789"
+                email = "Stevie.Watts.655@cranfield.ac.uk"
+            else :
+                name = f"test{i}" 
+                amount = round(random.uniform(1, 1000), 2)
+                phone ="07" + "".join(random.choices(string.digits, k=9))
+                email = "test" + str(i) + "@example.com"
             self.execute( 
                 "INSERT INTO overdue (name, amount, phone, email) VALUES (?, ?, ?, ?)",
                 (name, amount, phone, email) ) 

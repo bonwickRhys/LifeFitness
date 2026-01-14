@@ -15,7 +15,7 @@ class App(tk.Tk):
         self.db = Database()
         self.email_service = EmailService(
         sender_email="lifefitnessautomatic@gmail.com",
-        app_password="app_password_here"
+        app_password="your_app_password_here"
     )
         self.frames = {}
 
@@ -94,7 +94,6 @@ class HomePage(tk.Frame):
         #  instatiate the frame as you would instantiate a normal frame
         tk.Label(self, text="Welcome!", font=("Arial", 18)).pack(pady=20)
 
-
 class overDueBalancePage(tk.Frame):
     def __init__(self, parent, controller):
         self.controller = controller
@@ -144,7 +143,7 @@ class overDueBalancePage(tk.Frame):
             self.open_email_popup(name, email, amount)
     def open_email_popup(self, name, email, amount):
         win = tk.Toplevel(self)
-        win.title(f"Email {name}")
+        win.title(f"Send Email to {email}")
         win.geometry("400x300")
 
         tk.Label(win, text=f"To: {email}", font=("Arial", 12)).pack(pady=10)
@@ -165,7 +164,6 @@ class overDueBalancePage(tk.Frame):
             user_message=message,
             amount=amount
         )
-
         if success:
             messagebox.showinfo("Success", msg)
         else:
