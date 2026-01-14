@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from database import Database
 from emailClient import EmailService
 class App(tk.Tk):
@@ -13,10 +14,9 @@ class App(tk.Tk):
         self.container.pack(fill="both", expand=True)
         self.db = Database()
         self.email_service = EmailService(
-        sender_email="yourgmail@gmail.com",
-        app_password="YOUR_APP_PASSWORD"
+        sender_email="lifefitnessautomatic@gmail.com",
+        app_password="app_password_here"
     )
-
         self.frames = {}
 
         # Add each page class here
@@ -96,30 +96,82 @@ class HomePage(tk.Frame):
 
 
 class overDueBalancePage(tk.Frame):
-    def __init__(self,parent,controller):
+    def __init__(self, parent, controller):
         self.controller = controller
         super().__init__(parent)
-        tk.Label(self, text="OverDue Balances", font=("Arial", 18)).pack(pady=20)
-        columns = ("Name", "Amount Due", "Phone Number", "Email")
 
-        table = ttk.Treeview(self, columns=columns, show="headings")
-        table.pack(fill="both", expand=True)
+        tk.Label(self, text="OverDue Balances", font=("Arial", 18)).pack(pady=20)
+
+        columns = ("Name", "Amount Due", "Phone Number", "Email", "Send Email")
+
+        self.table = ttk.Treeview(self, columns=columns, show="headings")
+        self.table.pack(fill="both", expand=True)
 
         for col in columns:
-            table.heading(col, text=col)
+            self.table.heading(col, text=col)
 
+        # Insert rows
         for row in self.fetch_overdue_data():
-            print("currentRow",row)
             rowData = (
                 row["name"],
                 row["amount"],
                 row["phone"],
-                row["email"]
+                row["email"],
+                "Send Email"
             )
-            table.insert("", "end", values=rowData)
+            self.table.insert("", "end", values=rowData)
+
+        # Bind click event
+        self.table.bind("<Button-1>", self.on_table_click)
 
     def fetch_overdue_data(self):
         return self.controller.db.query("SELECT * FROM overdue")
+    
+    def on_table_click(self, event):
+        region = self.table.identify("region", event.x, event.y)
+        if region != "cell":
+            return
+
+        row_id = self.table.identify_row(event.y)
+        col_id = self.table.identify_column(event.x)
+
+        # "Send Email" is the 5th column → #5
+        if col_id == "#5":
+            values = self.table.item(row_id, "values")
+            name = values[0]
+            email = values[3]
+            amount = values[1] 
+            self.open_email_popup(name, email, amount)
+    def open_email_popup(self, name, email, amount):
+        win = tk.Toplevel(self)
+        win.title(f"Email {name}")
+        win.geometry("400x300")
+
+        tk.Label(win, text=f"To: {email}", font=("Arial", 12)).pack(pady=10)
+
+        tk.Label(win, text="Message:", font=("Arial", 10)).pack()
+        message_box = tk.Text(win, height=10, width=40)
+        message_box.pack(pady=5)
+
+        send_btn = tk.Button(
+            win,
+            text="Send Email",
+            command=lambda: self.send_email_action(email, message_box.get("1.0", "end"), amount)
+        )
+        send_btn.pack(pady=10)
+    def send_email_action(self, email, message, amount):
+        success, msg = self.controller.email_service.send_email(
+            to_email=email,
+            user_message=message,
+            amount=amount
+        )
+
+        if success:
+            messagebox.showinfo("Success", msg)
+        else:
+            messagebox.showerror("Error", msg)
+
+
 
 if __name__ == "__main__":
 

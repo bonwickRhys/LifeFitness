@@ -1,17 +1,41 @@
 <html>
-  <body style="font-family: Arial, sans-serif; padding: 20px; background: #f7f7f7;">
-    <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
-      <h2 style="color: #333;">Overdue Payment Reminder</h2>
+  <body style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
+    <div style="max-width: 650px; margin: auto; background: #ffffff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
 
-      <p style="font-size: 15px; color: #444;">
+      <!-- Header -->
+      <h2 style="color: #222; margin-bottom: 10px;">LifeFitness Overdue Payment Notice</h2>
+      <p style="color: #555; font-size: 14px; margin-top: 0;">
+        We hope you're doing well. This is a friendly reminder regarding your outstanding balance.
+      </p>
+
+      <!-- Summary Section -->
+      <div style="background: #f9f9f9; border-left: 4px solid #0073e6; padding: 15px; margin: 20px 0; border-radius: 6px;">
+        <h3 style="margin: 0 0 10px 0; color: #0073e6;">Account Summary</h3>
+        <p style="margin: 0; font-size: 15px; color: #333;">
+          <strong>Amount Owed:</strong> £{{amount}}
+        </p>
+      </div>
+
+      <!-- Custom Message -->
+      <p style="font-size: 15px; color: #444; line-height: 1.6;">
         {{message}}
       </p>
 
-      <hr style="margin: 30px 0;">
+      <!-- Divider -->
+      <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
 
-      <p style="font-size: 12px; color: #888;">
-        This is an automated message from LifeFitness.
+      <!-- Footer / Sign-off -->
+      <p style="font-size: 14px; color: #555; margin-bottom: 5px;">
+        Kind regards,
       </p>
+      <p style="font-size: 14px; color: #222; font-weight: bold; margin-top: 0;">
+        The LifeFitness Team
+      </p>
+
+      <p style="font-size: 12px; color: #999; margin-top: 25px;">
+        This is an automated message sent by the LifeFitness system. If you believe this was sent in error, please contact our support team.
+      </p>
+
     </div>
   </body>
 </html>

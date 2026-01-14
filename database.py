@@ -34,7 +34,7 @@ class Database:
             name = f"test{i}" 
             amount = round(random.uniform(1, 1000), 2)
             phone ="07" + "".join(random.choices(string.digits, k=9))
-            email = f"test{i}@example.com" 
+            email = "rhysbonwick2006@gmail.com" 
             self.execute( 
                 "INSERT INTO overdue (name, amount, phone, email) VALUES (?, ?, ?, ?)",
                 (name, amount, phone, email) ) 
