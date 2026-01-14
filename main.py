@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
-import sqlite3
-
+from database import Database
+from emailClient import EmailService
 class App(tk.Tk):
-    def __init__(self, cur):
+    def __init__(self):
         super().__init__()
 
         self.title("LifeFitness App")
@@ -11,15 +11,18 @@ class App(tk.Tk):
         self.navbar = None 
         self.container = tk.Frame(self)
         self.container.pack(fill="both", expand=True)
-       
+        self.db = Database()
+        self.email_service = EmailService(
+        sender_email="yourgmail@gmail.com",
+        app_password="YOUR_APP_PASSWORD"
+    )
+
         self.frames = {}
 
         # Add each page class here
         # we are using the actual class here and not an instance of the class
         for Page in (LoginPage, HomePage,overDueBalancePage):
-            # Page() creates a new instance of the current class we are iterating over
-            # by passing in self we can access the methods of this class within every page class (showFrame())
-            frame = Page(self.container, self,cur)
+            frame = Page(self.container, self)
             #store the instance within the frames property
             self.frames[Page] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -51,7 +54,7 @@ class App(tk.Tk):
 
 
 class LoginPage(tk.Frame):
-    def __init__(self, parent, controller, cur):
+    def __init__(self, parent, controller):
         super().__init__(parent)
         # instatiate the frame as you would instantiate a normal frame
         tk.Label(self, text="Login", font=("Arial", 18)).pack(pady=20)
@@ -86,17 +89,17 @@ class LoginPage(tk.Frame):
             self.message.config(text="Invalid credentials")
 
 class HomePage(tk.Frame):
-    def __init__(self, parent, controller, cur):
+    def __init__(self, parent, controller):
         super().__init__(parent)
         #  instatiate the frame as you would instantiate a normal frame
         tk.Label(self, text="Welcome!", font=("Arial", 18)).pack(pady=20)
 
 
 class overDueBalancePage(tk.Frame):
-    def __init__(self,parent,controller,cur):
+    def __init__(self,parent,controller):
+        self.controller = controller
         super().__init__(parent)
         tk.Label(self, text="OverDue Balances", font=("Arial", 18)).pack(pady=20)
-        self.cur = cur
         columns = ("Name", "Amount Due", "Phone Number", "Email")
 
         table = ttk.Treeview(self, columns=columns, show="headings")
@@ -107,32 +110,21 @@ class overDueBalancePage(tk.Frame):
 
         for row in self.fetch_overdue_data():
             print("currentRow",row)
-            rowData = {
-                "Name": row["name"],
-                "Amount Due": row["amountOwed"],
-                "Phone Number": row["phoneNumber"],
-                "Email": row["email"]
-            }
+            rowData = (
+                row["name"],
+                row["amount"],
+                row["phone"],
+                row["email"]
+            )
             table.insert("", "end", values=rowData)
 
     def fetch_overdue_data(self):
-        rows = self.cur.execute("SELECT * FROM users")
-        rows = self.cur.fetchall()
-        for row in rows:
-            print(row)
-        return rows
-
-def printDatabaseContents(cur):
-    cur.execute("SELECT * FROM users")
-    rows = cur.fetchall()
-    for row in rows:
-        print(row)
-
+        return self.controller.db.query("SELECT * FROM overdue")
 
 if __name__ == "__main__":
-    conn = sqlite3.connect("overdueBalances.db")
-    conn.row_factory = sqlite3.Row  # This makes rows behave like dictionaries
-    cur = conn.cursor()
-    app = App(cur)
+
+    # fake data
+
+    app = App()
     app.mainloop()
     
