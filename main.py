@@ -3,55 +3,76 @@ from tkinter import ttk
 from tkinter import messagebox
 from database import Database
 from emailClient import EmailService
-
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.title("FitLife App")
         self.geometry("910x540")
-        self.navbar = None 
-        self.container = tk.Frame(self)
+
+        # Main wrapper
+        self.main_frame = tk.Frame(self)
+        self.main_frame.pack(fill="both", expand=True)
+
+        # Navbar (created but NOT packed yet)
+        self.navbar = tk.Frame(self.main_frame, bg="#ddd", height=50)
+        self.create_navbar()
+        # do NOT pack here
+
+
+        # Container BELOW navbar
+        self.container = tk.Frame(self.main_frame)
         self.container.pack(fill="both", expand=True)
+
+        # Make container use grid internally
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+
+        # --- DB + EMAIL SERVICE ---
         self.db = Database()
         self.email_service = EmailService(
-        sender_email="lifefitnessautomatic@gmail.com",
-        app_password=""
-    )
-        self.frames = {}
+            sender_email="lifefitnessautomatic@gmail.com",
+            app_password=""
+        )
 
-        # Add each page class here
-        # we are using the actual class here and not an instance of the class
-        for Page in (LoginPage, HomePage,overDueBalancePage):
+        # --- PAGES ---
+        self.frames = {}
+        for Page in (LoginPage, HomePage, overDueBalancePage):
             frame = Page(self.container, self)
-            #store the instance within the frames property
             self.frames[Page] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        # Initally show the LoginPage
+        # Start on login page
         self.show_frame(LoginPage)
 
     def show_frame(self, page):
         frame = self.frames[page]
-        # tkraise and classes is the standard for switching between pages
         frame.tkraise()
 
-    def logout(self,page):
+    def logout(self, page):
         self.show_frame(page)
-        # hide navbar
         self.navbar.pack_forget()
-        self.navbar = None
 
     def create_navbar(self):
-        if self.navbar:
-            return 
-        
-        self.navbar = tk.Frame(self, bg="#ddd", height=50) 
-        self.navbar.pack(fill="x") 
+        # Inner frame to hold buttons
+        btn_frame = tk.Frame(self.navbar, bg="#ddd")
+        btn_frame.pack(expand=True)   # expand centers it horizontally
 
-        tk.Button(self.navbar, text="Home", command=lambda: self.show_frame(HomePage)).pack(side="top",pady="10") 
-        tk.Button(self.navbar, text="Overdue", command=lambda: self.show_frame(overDueBalancePage)).pack(side="top",pady="10") 
-        tk.Button(self.navbar, text="Logout", command=lambda: self.logout(LoginPage)).pack(side="top",pady="10")
+        tk.Button(btn_frame, text="Home",
+                command=lambda: self.show_frame(HomePage)
+        ).pack(side="left", padx=20, pady=10)
+
+        tk.Button(btn_frame, text="Overdue",
+                command=lambda: self.show_frame(overDueBalancePage)
+        ).pack(side="left", padx=20, pady=10)
+
+        tk.Button(btn_frame, text="Logout",
+                command=lambda: self.logout(LoginPage)
+        ).pack(side="left", padx=20, pady=10)
+
+    def showNavbar(self):
+        self.navbar.pack(fill="x", side="top", before=self.container)
+
 
 class LoginPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -83,8 +104,8 @@ class LoginPage(tk.Frame):
         # temp login logic
         # replace with envvars + database hashed query
         if user == "root" and pwd == "toor":
-            controller.create_navbar()
             controller.show_frame(HomePage)
+            controller.showNavbar()
         else:
             self.message.config(text="Invalid credentials")
 
