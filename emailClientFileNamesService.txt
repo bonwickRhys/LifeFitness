@@ -1,0 +1,2 @@
+sudo nano /etc/systemd/system/lifefitness-reminders.service
+sudo nano /etc/systemd/system/lifefitness-reminders.timer

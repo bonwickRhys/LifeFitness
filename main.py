@@ -3,11 +3,12 @@ from tkinter import ttk
 from tkinter import messagebox
 from database import Database
 from emailClient import EmailService
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        self.title("LifeFitness App")
+        self.title("FitLife App")
         self.geometry("910x540")
         self.navbar = None 
         self.container = tk.Frame(self)
@@ -15,7 +16,7 @@ class App(tk.Tk):
         self.db = Database()
         self.email_service = EmailService(
         sender_email="lifefitnessautomatic@gmail.com",
-        app_password="your_app_password_here"
+        app_password=""
     )
         self.frames = {}
 
@@ -51,7 +52,6 @@ class App(tk.Tk):
         tk.Button(self.navbar, text="Home", command=lambda: self.show_frame(HomePage)).pack(side="top",pady="10") 
         tk.Button(self.navbar, text="Overdue", command=lambda: self.show_frame(overDueBalancePage)).pack(side="top",pady="10") 
         tk.Button(self.navbar, text="Logout", command=lambda: self.logout(LoginPage)).pack(side="top",pady="10")
-
 
 class LoginPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -140,6 +140,7 @@ class overDueBalancePage(tk.Frame):
             name = values[0]
             email = values[3]
             amount = values[1] 
+            self.current_name = name
             self.open_email_popup(name, email, amount)
     def open_email_popup(self, name, email, amount):
         win = tk.Toplevel(self)
@@ -161,19 +162,17 @@ class overDueBalancePage(tk.Frame):
     def send_email_action(self, email, message, amount):
         success, msg = self.controller.email_service.send_email(
             to_email=email,
+            name=self.current_name,
             user_message=message,
             amount=amount
         )
+
         if success:
             messagebox.showinfo("Success", msg)
         else:
             messagebox.showerror("Error", msg)
 
-
-
 if __name__ == "__main__":
-
-    # fake data
 
     app = App()
     app.mainloop()

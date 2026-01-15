@@ -8,19 +8,21 @@ class EmailService:
         self.sender_email = sender_email
         self.app_password = app_password
 
-    def load_template(self, template_path="email_template.html"):
-        """Load the HTML email template from file."""
+    def load_template(self, template_path="/home/rhys/Documents/LifeFitness/email_template.html"):
         with open(template_path, "r", encoding="utf-8") as f:
             return f.read()
 
-    def build_email_body(self, user_message, amount, template_path="email_template.html"):
+
+    def build_email_body(self, name, user_message, amount, template_path="email_template.html"):
         template = self.load_template(template_path)
+        template = template.replace("{{name}}", name)
         template = template.replace("{{message}}", user_message)
         template = template.replace("{{amount}}", str(amount))
         return template
 
-    def send_email(self, to_email, user_message, amount, subject="Overdue Balance Reminder"):
-        html_body = self.build_email_body(user_message, amount)
+    def send_email(self, to_email, name, user_message, amount,
+                   subject="FitLife Overdue Balance Reminder"):
+        html_body = self.build_email_body(name, user_message, amount)
 
         msg = MIMEText(html_body, "html")
         msg["Subject"] = subject
